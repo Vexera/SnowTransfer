@@ -28,6 +28,7 @@ class SnowTransfer {
      * @property {Raven|null} [raven] - optional [sentry raven](https://docs.sentry.io/clients/node/config/) instance used for catching errors
      * @param {String} token - Discord Bot token to use
      * @param {Object} [options] - options
+     * @param {Boolean} [options.disableEveryone=false] - Disable @everyone/@here on messages sent
      * @param {String} [options.sentryDsn] - Dsn to use for the sentry integration, disables the integration when empty
      * @param {Object} [options.sentryOptions] - Options to use for the sentry client, check the [sentry docs](https://docs.sentry.io/clients/node/config/) for more infos
      * @param {String} [options.baseHost=https://discordapp.com] - Base host to use for the requests, may be replaced when using a local hosted proxy
@@ -41,7 +42,7 @@ class SnowTransfer {
         if (!token.startsWith('Bot')) {
             token = `Bot ${token}`;
         }
-        this.options = {sentryOptions: {extra: {snowtransferVersion: version}}, useRedis: false};
+        this.options = {disableEveryone: false, sentryOptions: {extra: {snowtransferVersion: version}}, useRedis: false};
         this.token = token;
         this.raven = null;
         Object.assign(this.options, options);
