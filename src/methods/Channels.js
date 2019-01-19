@@ -12,10 +12,12 @@ class ChannelMethods {
      *
      * You can access the methods listed via `client.channel.method`, where `client` is an initialized SnowTransfer instance
      * @param {RequestHandler} requestHandler - request handler that calls the rest api
+     * @param {Boolean} disableEveryone - Disable @everyone/@here on outgoing messages
      * @constructor
      */
-    constructor(requestHandler) {
+    constructor(requestHandler, disableEveryone) {
         this.requestHandler = requestHandler;
+        this.disableEveryone = disableEveryone;
     }
 
     /**
@@ -146,6 +148,7 @@ class ChannelMethods {
      * @param {Object|String} data - Data to send, if data is a string it will be used as the content of the message,
      * if data is not a string you should take a look at the properties below to know what you may send
      * @param {?String} [data.content] - Content of the message
+     * @param {?Boolean} [data.disableEveryone] - Disable @everyone/@here on the message
      * @param {?Boolean} [data.tts=false] - if this message is text-to-speech
      * @param {Object} [data.embed] - [Embed](https://discordapp.com/developers/docs/resources/channel#embed-object) to send
      * @param {Object} [data.file] - File, that should be uploaded
@@ -187,8 +190,15 @@ class ChannelMethods {
             throw new Error('Missing content or embed');
         }
         if (typeof data === 'string') {
-            return this.requestHandler.request(Endpoints.CHANNEL_MESSAGES(channelId), 'post', 'json', {content: data});
-        } else if (data.file) {
+            data = {content: data};
+        }
+
+        // Sanitize the message
+        if (data.content && (data.disableEveryone !== undefined ? data.disableEveryone : this.disableEveryone)) {
+            data.content = data.content.replace(/@everyone/g, "@\u200beveryone").replace(/@here/g, "@\u200bhere");
+        }
+
+        if (data.file) {
             return this.requestHandler.request(Endpoints.CHANNEL_MESSAGES(channelId), 'post', 'multipart', data);
         } else {
             return this.requestHandler.request(Endpoints.CHANNEL_MESSAGES(channelId), 'post', 'json', data);
@@ -201,6 +211,7 @@ class ChannelMethods {
      * @param {String} messageId - Id of the message
      * @param {Object|String} data - Data to send
      * @param {String} [data.content] - Content of the message
+     * @param {?Boolean} [data.disableEveryone] - Disable @everyone/@here on the message
      * @param {Object} [data.embed] - Embed to send
      * @returns {Promise.<Object>} [discord message](https://discordapp.com/developers/docs/resources/channel#message-object) object
      * @example
@@ -215,10 +226,15 @@ class ChannelMethods {
             throw new Error('Missing content or embed');
         }
         if (typeof data === 'string') {
-            return this.requestHandler.request(Endpoints.CHANNEL_MESSAGE(channelId, messageId), 'patch', 'json', {content: data});
-        } else {
-            return this.requestHandler.request(Endpoints.CHANNEL_MESSAGE(channelId, messageId), 'patch', 'json', data);
+            data = {content: data};
         }
+
+        // Sanitize the message
+        if (data.content && (data.disableEveryone !== undefined ? data.disableEveryone : this.disableEveryone)) {
+            data.content = data.content.replace(/@everyone/g, "@\u200beveryone").replace(/@here/g, "@\u200bhere");
+        }
+
+        return this.requestHandler.request(Endpoints.CHANNEL_MESSAGE(channelId, messageId), 'patch', 'json', data);
     }
 
     /**
