@@ -148,12 +148,12 @@ class ChannelMethods {
      * @param {Object|String} data - Data to send, if data is a string it will be used as the content of the message,
      * if data is not a string you should take a look at the properties below to know what you may send
      * @param {?String} [data.content] - Content of the message
-     * @param {?Boolean} [data.disableEveryone] - Disable @everyone/@here on the message
      * @param {?Boolean} [data.tts=false] - if this message is text-to-speech
      * @param {Object} [data.embed] - [Embed](https://discordapp.com/developers/docs/resources/channel#embed-object) to send
      * @param {Object} [data.file] - File, that should be uploaded
      * @param {String} [data.file.name] - Name of the file
      * @param {File} [data.file.file] - Buffer with file contents
+     * @param {?Boolean} [options.disableEveryone] - Disable @everyone/@here on the message
      * @returns {Promise.<Object>} [discord message](https://discordapp.com/developers/docs/resources/channel#message-object) object
      *
      * | Permissions needed | condition |
@@ -185,7 +185,7 @@ class ChannelMethods {
      * let fileData = fs.readFileSync('nice_picture.png') // You should probably use fs.readFile, since it's asynchronous, synchronous methods may lag your bot.
      * client.channel.createMessage('channel id', {content: 'This is a nice picture', file: {name: 'Optional Filename.png', file: fileData}})
      */
-    async createMessage(channelId, data) {
+    async createMessage(channelId, data, options = {}) {
         if (typeof data !== 'string' && !data.content && !data.embed && !data.file) {
             throw new Error('Missing content or embed');
         }
@@ -194,7 +194,7 @@ class ChannelMethods {
         }
 
         // Sanitize the message
-        if (data.content && (data.disableEveryone !== undefined ? data.disableEveryone : this.disableEveryone)) {
+        if (data.content && (options.disableEveryone !== undefined ? options.disableEveryone : this.disableEveryone)) {
             data.content = data.content.replace(/@everyone/g, "@\u200beveryone").replace(/@here/g, "@\u200bhere");
         }
 
@@ -211,8 +211,8 @@ class ChannelMethods {
      * @param {String} messageId - Id of the message
      * @param {Object|String} data - Data to send
      * @param {String} [data.content] - Content of the message
-     * @param {?Boolean} [data.disableEveryone] - Disable @everyone/@here on the message
      * @param {Object} [data.embed] - Embed to send
+     * @param {?Boolean} [options.disableEveryone] - Disable @everyone/@here on the message
      * @returns {Promise.<Object>} [discord message](https://discordapp.com/developers/docs/resources/channel#message-object) object
      * @example
      * // Simple ping response
@@ -221,7 +221,7 @@ class ChannelMethods {
      * let message = await client.channel.createMessage('channel id', 'pong')
      * client.channel.editMessage('channel id', message.id, `pong ${Date.now() - time}ms`)
      */
-    async editMessage(channelId, messageId, data) {
+    async editMessage(channelId, messageId, data, options = {}) {
         if (typeof data !== 'string' && !data.content && !data.embed) {
             throw new Error('Missing content or embed');
         }
@@ -230,7 +230,7 @@ class ChannelMethods {
         }
 
         // Sanitize the message
-        if (data.content && (data.disableEveryone !== undefined ? data.disableEveryone : this.disableEveryone)) {
+        if (data.content && (options.disableEveryone !== undefined ? options.disableEveryone : this.disableEveryone)) {
             data.content = data.content.replace(/@everyone/g, "@\u200beveryone").replace(/@here/g, "@\u200bhere");
         }
 
