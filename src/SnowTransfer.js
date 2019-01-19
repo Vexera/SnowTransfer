@@ -56,10 +56,10 @@ class SnowTransfer {
             raven: this.raven,
             baseHost: this.options.baseHost || Endpoints.BASE_HOST
         });
-        this.channel = new ChannelMethods(this.requestHandler);
+        this.channel = new ChannelMethods(this.requestHandler, this.options.disableEveryone);
         this.user = new UserMethods(this.requestHandler);
         this.emoji = new EmojiMethods(this.requestHandler);
-        this.webhook = new WebhookMethods(this.requestHandler);
+        this.webhook = new WebhookMethods(this.requestHandler, this.options.disableEveryone);
         this.guild = new GuildMethods(this.requestHandler);
         this.invite = new InviteMethods(this.requestHandler);
         this.voice = new VoiceMethods(this.requestHandler);
